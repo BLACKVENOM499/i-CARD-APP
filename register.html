@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Register</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="card">
+    <h2>Create account</h2>
+    <form id="registerForm">
+      <label>Email
+        <input id="email" type="email" required />
+      </label>
+      <label>Password
+        <input id="password" type="password" required minlength="6" />
+      </label>
+      <button type="submit" class="btn">Register</button>
+    </form>
+    <p class="muted">Already have an account? <a href="login.html">Login</a></p>
+    <div id="msg" class="msg"></div>
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+    const registerForm = document.getElementById('registerForm');
+    const msg = document.getElementById('msg');
+
+    registerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      msg.textContent = '';
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      try {
+        const res = await apiCall('/auth/register', 'POST', { email, password });
+        if (res.message) {
+          msg.textContent = res.message;
+          msg.className = 'msg success';
+          // auto-redirect to login after short pause
+          setTimeout(() => window.location = 'login.html', 900);
+        } else {
+          msg.textContent = res.error || JSON.stringify(res);
+          msg.className = 'msg error';
+        }
+      } catch (err) {
+        msg.textContent = err.message || 'Network error';
+        msg.className = 'msg error';
+      }
+    });
+  </script>
+</body>
+</html>
