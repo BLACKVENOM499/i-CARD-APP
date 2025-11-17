@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Profile</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="card">
+    <h2>Your Profile</h2>
+    <div id="content">Loading...</div>
+    <div style="margin-top:14px">
+      <button id="logoutBtn" class="btn outline">Logout</button>
+      <a class="btn" href="index.html">Home</a>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+    const content = document.getElementById('content');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    async function loadProfile() {
+      try {
+        const res = await apiCall('/profile', 'GET');
+        if (res.user) {
+          content.innerHTML = `
+            <p><strong>Email:</strong> ${escapeHtml(res.user.email)}</p>
+            <p><strong>ID:</strong> ${escapeHtml(res.user.id || res.user._id || '')}</p>
+            <p><em>Token is stored in an HTTP-only cookie and not accessible via JS.</em></p>
+          `;
+        } else {
+          // if unauthorized, server should return 401 or message
+          content.innerHTML = `<p class="msg error">Not authorized. Redirecting to login...</p>`;
+          setTimeout(() => window.location = 'login.html', 1200);
+        }
+      } catch (err) {
+        content.innerHTML = `<p class="msg error">Error: ${escapeHtml(err.message || 'Network error')}</p>`;
+      }
+    }
+
+    logoutBtn.addEventListener('click', async () => {
+      try {
+        await apiCall('/auth/logout', 'POST');
+      } catch (e) {
+        // ignore; still redirect
+      } finally {
+        window.location = 'login.html';
+      }
+    });
+
+    loadProfile();
+  </script>
+</body>
+</html>
